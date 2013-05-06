@@ -115,7 +115,7 @@ function baseApiFromPath(path) {
 function filterApiListing(req, res, r) {
   var route = req.route;
   var excludedPaths = [];
-  
+
   if (!r || !r.apis) {
     return stopWithError(res, {'reason': 'internal error', 'code': 500});
   }
@@ -139,10 +139,10 @@ function filterApiListing(req, res, r) {
 
   //  clone attributes in the resource
   var output = shallowClone(r);
-  
+
   //  models required in the api listing
   var requiredModels = [];
-  
+
   //  clone methods that user can access
   output.apis = [];
   var apis = JSON.parse(JSON.stringify(r.apis));
@@ -293,15 +293,15 @@ function canAccessResource(req, path, httpMethod) {
 
 /**
  * returns the json representation of a resource
- * 
+ *
  * @param request
  * @param response
  */
 function resourceListing(req, res) {
   var r = {
-    "apiVersion" : apiVersion, 
-    "swaggerVersion" : swaggerVersion, 
-    "basePath" : basePath, 
+    "apiVersion" : apiVersion,
+    "swaggerVersion" : swaggerVersion,
+    "basePath" : basePath,
     "apis" : []
   };
 
@@ -341,8 +341,8 @@ function addMethod(app, callback, spec) {
   var api = {"path" : spec.path};
   if (!resources[apiRootPath]) {
     if (!root) {
-      // 
-      var resourcePath = "/" + apiRootPath.replace(formatString, ""); 
+      //
+      var resourcePath = "/" + apiRootPath.replace(formatString, "");
       root = {
         "apiVersion" : apiVersion, "swaggerVersion": swaggerVersion, "basePath": basePath, "resourcePath": resourcePath, "apis": [], "models" : []
       };
@@ -364,22 +364,22 @@ function addMethod(app, callback, spec) {
       var path = req.url.split('?')[0].replace(jsonSuffix, "").replace(/{.*\}/, "*");
       if (!canAccessResource(req, path, req.method)) {
         res.send(JSON.stringify({"reason":"forbidden", "code":403}), 403);
-      } else {    
+      } else {
         try {
-          callback(req,res); 
+          callback(req,res);
         }
         catch (ex) {
           if (ex.code && ex.reason)
-            res.send(JSON.stringify(ex), ex.code); 
+            res.send(JSON.stringify(ex), ex.code);
           else {
             console.error(spec.method + " failed for path '" + require('url').parse(req.url).href + "': " + ex);
             res.send(JSON.stringify({"reason":"unknown error","code":500}), 500);
           }
         }
       }
-    }); 
+    });
   } else {
-    console.error('unable to add ' + currentMethod.toUpperCase() + ' handler');  
+    console.error('unable to add ' + currentMethod.toUpperCase() + ' handler');
     return;
   }
 }
@@ -389,7 +389,7 @@ function setAppHandler(app) {
   appHandler = app;
 }
 
-// Add swagger handlers to express 
+// Add swagger handlers to express
 function addHandlers(type, handlers) {
   for (var i = 0; i < handlers.length; i++) {
     if (!handlers.hasOwnProperty(i)) {
@@ -408,10 +408,10 @@ function discover(resource) {
       continue;
     }
     if (resource[key].spec && resource[key].spec.method && allowedMethods.indexOf(resource[key].spec.method.toLowerCase())>-1) {
-      addMethod(appHandler, resource[key].action, resource[key].spec); 
-    } 
+      addMethod(appHandler, resource[key].action, resource[key].spec);
+    }
     else
-      console.error('auto discover failed for: ' + key); 
+      console.error('auto discover failed for: ' + key);
   }
 }
 
@@ -433,7 +433,7 @@ function addPost() {
 }
 
 // adds delete handler
-function addDelete() { 
+function addDelete() {
   addHandlers('DELETE', arguments);
   return this;
 }
@@ -473,14 +473,14 @@ function wrap(callback, req, resp){
 function appendToApi(rootResource, api, spec) {
 
   if (!api.description) {
-    api.description = spec.description; 
+    api.description = spec.description;
   }
   var validationErrors = [];
 
   if(!spec.nickname || spec.nickname.indexOf(" ")>=0){
     //  nicknames don't allow spaces
     validationErrors.push({"path": api.path, "error": "invalid nickname '" + spec.nickname + "'"});
-  } 
+  }
   // validate params
   for ( var paramKey in spec.params) {
     if (!spec.params.hasOwnProperty(paramKey)) {
@@ -499,7 +499,7 @@ function appendToApi(rootResource, api, spec) {
         param.allowableValues = {valueType: type, min: values[0], max: values[1]};
       }
     }
-    
+
     switch (param.paramType) {
       case "path":
         if (api.path.indexOf("{" + param.name + "}") < 0) {
@@ -512,6 +512,8 @@ function appendToApi(rootResource, api, spec) {
         break;
       case "header":
         break;
+      case "form":
+        break;
       default:
         validationErrors.push({"path": api.path, "name": param.name, "error": "invalid param type " + param.paramType});
         break;
@@ -522,7 +524,7 @@ function appendToApi(rootResource, api, spec) {
     console.error(validationErrors);
     return;
   }
-  
+
   if (!api.operations) {
     api.operations = []; }
 
@@ -535,16 +537,16 @@ function appendToApi(rootResource, api, spec) {
     "nickname" : spec.nickname,
     "summary" : spec.summary
   };
-  
+
 	// Add custom fields.
 	for (var propertyName in spec) {
     if (!(propertyName in op)) {
-      op[propertyName] = spec[propertyName];          
+      op[propertyName] = spec[propertyName];
     }
 	}
-	
+
   if (spec.responseClass) {
-    op.responseClass = spec.responseClass; 
+    op.responseClass = spec.responseClass;
   }
   else {
     op.responseClass = "void";
@@ -552,7 +554,7 @@ function appendToApi(rootResource, api, spec) {
   api.operations.push(op);
 
   if (!rootResource.models) {
-    rootResource.models = {}; 
+    rootResource.models = {};
   }
 }
 
@@ -576,22 +578,22 @@ function stopWithError(res, error) {
 
 // Export most needed error types for easier handling
 exports.errors = {
-  'notFound': function(field, res) { 
-    if (!res) { 
+  'notFound': function(field, res) {
+    if (!res) {
       return {"code": 404, "reason": field + ' not found'}; }
-    else { 
+    else {
       res.send({"code": 404, "reason": field + ' not found'}, 404); }
   },
-  'invalid': function(field, res) { 
-    if (!res) { 
+  'invalid': function(field, res) {
+    if (!res) {
       return {"code": 400, "reason": 'invalid ' + field}; }
-    else { 
+    else {
       res.send({"code": 400, "reason": 'invalid ' + field}, 404); }
   },
   'forbidden': function(res) {
-    if (!res) { 
+    if (!res) {
       return {"code": 403, "reason": 'forbidden' }; }
-    else { 
+    else {
       res.send({"code": 403, "reason": 'forbidden'}, 403); }
   }
 };
