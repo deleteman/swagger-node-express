@@ -495,7 +495,6 @@ function appendToApi(rootResource, api, spec) {
     }
 	}
 
->>>>>>> d310794550d728e92ce1c9d9f1eced0211506941
   if (spec.responseClass) {
     op.responseClass = spec.responseClass;
   }
