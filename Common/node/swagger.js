@@ -548,12 +548,55 @@ exports.errors = {
   }
 };
 
+/**
+Creates a list of parameters accepted by Swagger from a JSON Schema 
+*/
+function paramsFromSchema (schema) {
+  function allowMultiple (data) {
+      return data.type.indexOf("array") != -1;
+  }
+
+  function allowableValues(data) {
+    var values = null;
+    if(data.minimum || data.maximum) {
+        values = {
+          valueType: "RANGE",
+          min: data.minimum,
+          max: data.maximum 
+        };
+    }
+
+    if(data.enum) {
+      values = {
+        valueType: "LIST",
+        values: data.enum
+      };
+    }
+    return values;
+  }
+
+  var paramList = [];
+  _.each(schema, function(params, type) {
+      _.each(params.properties, function(paramData, paramName){ 
+          if(!Array.isArray(paramData.type)) {
+            paramData.type = [paramData.type];
+          }
+          var multiple = allowMultiple(paramData);
+          var required = params.required.indexOf(paramName) != -1;
+          allowedValues = allowableValues(paramData);
+          paramList.push(exports.params[type](paramName, paramData.description, paramData.type[0], required, multiple, allowedValues));
+      });
+  });
+  return paramList;
+}
+
 exports.params = params;
 exports.queryParam = exports.params.query;
 exports.pathParam = exports.params.path;
 exports.postParam = exports.params.post;
 exports.getModels = allModels;
 
+exports.paramsFromSchema  = paramsFromSchema;
 exports.error = error;
 exports.stopWithError = stopWithError;
 exports.stop = stopWithError;

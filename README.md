@@ -2,9 +2,15 @@ This is the Wordnik Swagger code for the express framework.  For more on Swagger
 
 #Why a different module?
 
-The main motivation behind this module, is that I needed to do validations that might affect the flow of a request agains MongoDB. These vaildations had to be of async nature, but the valdiator describe below doens't accept this type of function, so in order to make it work I forked and extended Swagger-Node-Express.
+The main motivation behind this module, is that I needed a set of extra features from Swagger, but submitting a Pull Request would take too long.
 
-There is also a pull request awaiting approval on the official Github repo.
+##What's new?
+
++ Before method for controllers: Now you can define a `before` method that will be executed before the `action` method on the controller specs.(There is also a pull request awaiting approval on the official Github repo.)
+
++ JSON Schemas to create parameter lists: Swagger now has a new method `paramsFromSchema`. This method will allow the developer to define a JSON schema to describe the parameters, which in turn, could potentially be used to validate the request.
+
+
 
 See below for a code sample of how the _before_ function is defined.
 
