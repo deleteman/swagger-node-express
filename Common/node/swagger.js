@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+var _ = require("underscore");
 
 var formatString = ".{format}";
 var resourcePath = "/api-docs" + formatString;
@@ -584,7 +585,22 @@ function paramsFromSchema (schema) {
           var multiple = allowMultiple(paramData);
           var required = params.required.indexOf(paramName) != -1;
           allowedValues = allowableValues(paramData);
-          paramList.push(exports.params[type](paramName, paramData.description, paramData.type[0], required, multiple, allowedValues));
+          var param = null;
+          switch(type) {
+            case "query": 
+              param = exports.params.query(paramName, paramData.description, paramData.type[0], required, multiple, allowedValues);
+            break;
+            case "path": 
+              param = exports.params.path(paramName, paramData.description, paramData.type[0], allowedValues);
+            break; 
+            case "header":
+              param = exports.params.header(paramName, paramData.description, paramData.type[0], required);
+            break;
+            case "post":
+              param = exports.params.post(paramName, paramData.description);
+            break;
+          }
+          paramList.push(param);
       });
   });
   return paramList;
